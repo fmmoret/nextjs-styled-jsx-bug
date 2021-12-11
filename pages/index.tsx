@@ -1,7 +1,85 @@
-import type { NextPage } from 'next'
-import Head from 'next/head'
+import type { NextPage } from "next";
+import Head from "next/head";
 
-const breakPoint = 'max-width: 1024px';
+type ScreenSize = keyof typeof MediaQueries["MIN_WIDTHS"];
+class MediaQueries {
+  static readonly MIN_WIDTHS = {
+    xs: 0,
+    sm: 576,
+    md: 768,
+    lg: 992,
+    xl: 1200,
+  };
+  static readonly MAX_WIDTHS = {
+    xs: MediaQueries.MIN_WIDTHS.sm - 1,
+    sm: MediaQueries.MIN_WIDTHS.md - 1,
+    md: MediaQueries.MIN_WIDTHS.lg - 1,
+    lg: MediaQueries.MIN_WIDTHS.xl - 1,
+    xl: Infinity,
+  };
+
+  // ignores order of args
+  static between(screenSize: ScreenSize, screenSize2: ScreenSize) {
+    const MAX_WIDTH = Math.max(
+      MediaQueries.MAX_WIDTHS[screenSize],
+      MediaQueries.MAX_WIDTHS[screenSize2]
+    );
+    const MIN_WIDTH = Math.min(
+      MediaQueries.MIN_WIDTHS[screenSize],
+      MediaQueries.MIN_WIDTHS[screenSize2]
+    );
+
+    const hasMin = Number.isFinite(MIN_WIDTH);
+    const hasMax = Number.isFinite(MAX_WIDTH);
+    if (hasMin && hasMax) {
+      return `only screen and (min-width: ${MIN_WIDTH}px) and (max-width: ${MAX_WIDTH}px)`;
+    }
+    if (hasMax) {
+      return `only screen and (max-width: ${MAX_WIDTH}px)`;
+    }
+    if (hasMin) {
+      return `only screen and (min-width: ${MIN_WIDTH}px)`;
+    }
+    return `only screen and (min-width: 0px)`;
+  }
+
+  static down(screenSize: ScreenSize) {
+    const MAX_WIDTH = MediaQueries.MAX_WIDTHS[screenSize];
+    const hasMax = Number.isFinite(MAX_WIDTH);
+    if (hasMax) {
+      return `only screen and (max-width: ${MAX_WIDTH}px)`;
+    }
+    return `only screen and (min-width: 0px)`;
+  }
+
+  static only(screenSize: ScreenSize) {
+    const MAX_WIDTH = MediaQueries.MAX_WIDTHS[screenSize];
+    const MIN_WIDTH: number = MediaQueries.MIN_WIDTHS[screenSize];
+
+    const hasMin = Number.isFinite(MIN_WIDTH);
+    const hasMax = Number.isFinite(MAX_WIDTH);
+    if (hasMin && hasMax) {
+      return `only screen and (min-width: ${MIN_WIDTH}px) and (max-width: ${MAX_WIDTH}px)`;
+    }
+    if (hasMax) {
+      return `only screen and (max-width: ${MAX_WIDTH}px)`;
+    }
+    if (hasMin) {
+      return `only screen and (min-width: ${MIN_WIDTH}px)`;
+    }
+    return `only screen and (min-width: 0px)`;
+  }
+
+  static up(screenSize: ScreenSize) {
+    const MIN_WIDTH: number = MediaQueries.MIN_WIDTHS[screenSize];
+    const hasMin = Number.isFinite(MIN_WIDTH);
+
+    if (hasMin) {
+      return `only screen and (min-width: ${MIN_WIDTH}px)`;
+    }
+    return `only screen and (min-width: 0px)`;
+  }
+}
 
 const Home: NextPage = () => {
   return (
@@ -35,15 +113,39 @@ const Home: NextPage = () => {
             justify-content: center;
             align-items: center;
           }
-  
+
           .title {
             margin: 0;
             line-height: 1.15;
             font-size: 4rem;
             text-align: center;
           }
-          
-          @media (${breakPoint}) {
+
+          @media ${MediaQueries.up("xs")} {
+            .container {
+              background-color: red;
+            }
+          }
+
+          @media ${MediaQueries.up("sm")} {
+            .container {
+              background-color: blue;
+            }
+          }
+
+          @media ${MediaQueries.up("lg")} {
+            .container {
+              background-color: green;
+            }
+          }
+
+          @media ${MediaQueries.up("xl")} {
+            .container {
+              background-color: yellow;
+            }
+          }
+
+          @media ${MediaQueries.between("md", "lg")} {
             .title {
               color: red;
             }
@@ -51,7 +153,7 @@ const Home: NextPage = () => {
         `}
       </style>
     </>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
